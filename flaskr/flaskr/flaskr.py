@@ -165,6 +165,7 @@ def register():
 
 @app.route('/searchfirst', methods=['POST', 'GET'])
 def search_first():
+    session['back'] = True
     if request.method == 'POST':
         db = get_db()
         cur = db.execute('select firstName, lastName, idNum from visitors order by id desc')
@@ -174,59 +175,39 @@ def search_first():
             if row[0] == request.form['firstName']:
                 vlist.append(row)
                 db.commit()
-        return render_template('firstlist.html', users=vlist)
+        return render_template('searchlist.html', users=vlist)
     return render_template('searchfirst.html')
 
-@app.route('/firstlist', methods=['POST'])
-def first_list():
-    return render_template('firstlist.html')
-
-@app.route('/searchlast', methods=['POST'])
+@app.route('/searchlast', methods=['POST', 'GET'])
 def search_last():
-    db = get_db()
-    cur = db.execute('select firstName, lastName, regTimestamp, image, idNum from visitors order by id desc')
-    vistors = cur.fetchall()
-    vlist = []
-    final = {}
-    num = 0
-    for row in vistors:
-        if row[1] == request.form['lastName']:
-            vlist.append(row)
-    for visit in vlist:
-        final[str(num)] = visit[0]
-        num += 1
-        final[str(num)] = visit[1]
-        num += 1
-        final[str(num)] = visit[2]
-        num += 1
-        final[str(num)] = visit[3]
-        num += 1
-        final[str(num)] = visit[4]
-        num += 1
-    db.commit()
-    return jsonify(final)
+    session['back'] = True
+    if request.method == 'POST':
+        db = get_db()
+        cur = db.execute('select firstName, lastName, idNum from visitors order by id desc')
+        vistors = cur.fetchall()
+        vlist = []
+        for row in vistors:
+            if row[1] == request.form['lastName']:
+                vlist.append(row)
+                db.commit()
+        return render_template('searchlist.html', users=vlist)
+    return render_template('searchlast.html')
 
-@app.route('/searchnum', methods=['POST'])
+@app.route('/searchnum', methods=['POST', 'GET'])
 def search_num():
-    db = get_db()
-    cur = db.execute('select firstName, lastName, regTimestamp, image, idNum from visitors order by id desc')
-    vistors = cur.fetchall()
-    vlist = []
-    final = {}
-    num = 0
-    for vistor in vistors:
-        if visitor[4] == request.form['idNum']:
-            vlist.append(visitor)
-    for visit in vlist:
-        final[str(num)] = visit[0]
-        num += 1
-        final[str(num)] = visit[1]
-        num += 1
-        final[str(num)] = visit[2]
-        num += 1
-        final[str(num)] = visit[3]
-        num += 1
-        final[str(num)] = visit[4]
-        num += 1
-    db.commit()
-    return jsonify(final)
+    session['back'] = True
+    if request.method == 'POST':
+        db = get_db()
+        cur = db.execute('select firstName, lastName, idNum from visitors order by id desc')
+        vistors = cur.fetchall()
+        vlist = []
+        for row in vistors:
+            if row[2] == request.form['number']:
+                vlist.append(row)
+                db.commit()
+        return render_template('searchlist.html', users=vlist)
+    return render_template('searchnum.html')
+
+@app.route('/searchlist', methods=['POST'])
+def search_list():
+    return render_template('searchlist.html')

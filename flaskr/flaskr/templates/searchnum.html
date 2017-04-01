@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>Personal ID Search</h2>
+  <form action="{{ url_for('search_num') }}" method=post>
+    <dl>
+      <dt>Personal ID:
+      <dd><input type=text name=number>
+      <dd><input type=submit value="Search">
+    </dl>
+  </form>
+{% endblock %}
