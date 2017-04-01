@@ -2,8 +2,10 @@ import os
 import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
 app.config.from_object(__name__)
 
 # Load default config and override config from an environment variable
@@ -86,7 +88,7 @@ def profile():
         worker = "1"
     db = get_db()
     db.execute('insert into users (username, password, admin, security, worker) values (?, ?, ?, ?, ?)',
-                 [request.form['username'], request.form['password'], admin, security, worker])
+                 [request.form['username'], pw_hash = bcrypt.generate_password_hash(request.form['password']).decode('utf-8'), admin, security, worker])
     db.commit()
     flash('New user was successfully added')
     return redirect(url_for('admin'))
@@ -96,14 +98,14 @@ def login():
     cur = db.execute('select username, password, admin, security, worker from users order by id desc')
     users = cur.fetchall()
     for user in users:
-        if user.username == request.form['username'] and user.password == request.form['password']:
+        if user.username == request.form['username'] and bcrypt.check_password_hash(user.password, request.form['password']):
             if user.admin == "1":
                 return jsonify(response=2)
             elif user.security == "1":
                 return jsonify(response=3)
             else:
                 return jsonify(response=4)
-        elif user.username == request.form['username'] and user.password != request.form['password']:
+        elif user.username == request.form['username'] and !bcrypt.check_password_hash(user.password, request.form['password']):
             return jsonify(response=1)
     return jsonify(response=0)
 
