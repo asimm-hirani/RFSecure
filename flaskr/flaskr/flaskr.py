@@ -1,4 +1,5 @@
 import os
+import datetime
 import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
@@ -54,10 +55,21 @@ def home():
 
 @app.route('/admin')
 def admin():
+    session['back'] = False
     db = get_db()
     cur = db.execute('select username, password from users order by id desc')
     users = cur.fetchall()
     return render_template('admin.html', users=users)
+
+@app.route('/security')
+def security():
+    session['back'] = False
+    return render_template('security.html')
+
+@app.route('/worker')
+def worker():
+    session['back'] = False
+    return render_template('worker.html')
 
 @app.route('/add', methods=['POST'])
 def add_visit():
@@ -73,6 +85,7 @@ def profile():
     admin = None
     security = None
     worker = None
+    session['back'] = True
     if request.method == 'POST':
         db = get_db()
         cur = db.execute('select username from users order by id desc')
@@ -98,6 +111,7 @@ def profile():
             [request.form['username'], bcrypt.generate_password_hash(request.form['password']).decode('utf-8'), admin, security, worker])
         db.commit()
         flash('New user was successfully added')
+        session['back'] = False
         return redirect(url_for('admin'))
     return render_template('profile.html', error=error)
 
@@ -110,17 +124,17 @@ def actual_login():
         if row[0] == request.form['username'] and bcrypt.check_password_hash(row[1], request.form['password']):
             if row[2] == "1":
                 db.commit()
-                session['logged_in'] = True
+                session['admin'] = True
                 flash('You were logged in')
                 return redirect(url_for('admin'))
             elif row[3] == "1":
                 db.commit()
-                error = 'invalid credentials'
-                return render_template('actuallogin.html', error=error)
+                session['security'] = True
+                return redirect(url_for('security'))
             else:
                 db.commit()
-                error = 'invalid credentials'
-                return render_template('actuallogin.html', error=error)
+                session['worker'] = True
+                return redirect(url_for('worker'))
         elif row[0] == request.form['username'] and not bcrypt.check_password_hash(row[1], request.form['password']):
             db.commit()
             error = 'invalid password'
@@ -128,6 +142,26 @@ def actual_login():
     db.commit()
     error = 'invalid username'
     return render_template('actuallogin.html', error=error)
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    error = None
+    session['back'] = True
+    if request.method == 'POST':
+        db = get_db()
+        cur = db.execute('select numID from visitors order by id desc')
+        visitors = cur.fetchall()
+        for row in visitors:
+            if row[0] == request.form['number']:
+                error = 'duplicate personal ID'
+                return render_template('register.html', error=error)
+        db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum) values (?, ?, ?, ?, ?)',
+            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number']])
+        db.commit()
+        flash('New visitor was successfully added')
+        session['back'] = False
+        return redirect(url_for('worker'))
+    return render_template('register.html', error=error)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -225,9 +259,3 @@ def search_num():
         num += 1
     db.commit()
     return jsonify(final)
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
-    return redirect(url_for('home'))

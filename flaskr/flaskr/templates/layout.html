@@ -4,8 +4,17 @@
 <div class=page>
   <h1>RFSecure</h1>
   <div class=metanav>
-  {% if session.logged_in %}
+  {% if session.admin %}
       <a href="{{ url_for('profile') }}">Create New User</a>
+  {% elif session.worker %}
+      <a href="{{ url_for('register') }}">Register New Visitor</a>
+  {% endif %}
+  {% if session.back and session.admin%}
+      <a href="{{ url_for('admin') }}">Back</a>
+  {% elif session.back and session.security %}
+      <a href="{{ url_for('security') }}">Back</a>
+  {% elif session.back and session.worker %}
+      <a href="{{ url_for('worker') }}">Back</a>
   {% endif %}
   </div>
   {% for message in get_flashed_messages() %}
