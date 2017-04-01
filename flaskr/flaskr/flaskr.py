@@ -62,9 +62,16 @@ def add_visit():
 
 @app.route('/profile', methods=['POST', 'GET'])
 def profile():
+    error = None
     admin = None
     security = None
     worker = None
+    cur = db.execute('select username from users order by id desc')
+    users = cur.fetchall()
+    for user in users:
+        if user.username == request.form['username']:
+            error = 'invalid username'
+            return render_template('profile.html', error=error)
     if request.form['type'] == "admin":
         admin = "1"
         security = "0"
@@ -82,7 +89,7 @@ def profile():
                  [request.form['username'], request.form['password'], admin, security, worker])
     db.commit()
     flash('New user was successfully added')
-    return render_template('profile.html')
+    return redirect(url_for('admin'))
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -99,3 +106,72 @@ def login():
         elif user.username == request.form['username'] and user.password != request.form['password']:
             return jsonify(response=1)
     return jsonify(response=0)
+
+@app.route('/searchfirst', methods=['POST'])
+def search_first():
+    cur = db.execute('select firstName, lastName, regTimestamp, image, idNum from visitors order by id desc')
+    vistors = cur.fetchall()
+    vlist = []
+    final = {}
+    num = 0
+    for vistor in vistors:
+        if visitor.firstName == request.form['firstName']:
+            vlist.append(visitor)
+    for visit in vlist:
+        final[str(num)] = visit.firstName
+        num += 1
+        final[str(num)] = visit.lastName
+        num += 1
+        final[str(num)] = visit.regTimestamp
+        num += 1
+        final[str(num)] = visit.image
+        num += 1
+        final[str(num)] = visit.idNum
+        num += 1
+    return jsonify(final)
+
+@app.route('/searchlast', methods=['POST'])
+def search_last():
+    cur = db.execute('select firstName, lastName, regTimestamp, image, idNum from visitors order by id desc')
+    vistors = cur.fetchall()
+    vlist = []
+    final = {}
+    num = 0
+    for vistor in vistors:
+        if visitor.lastName == request.form['lastName']:
+            vlist.append(visitor)
+    for visit in vlist:
+        final[str(num)] = visit.firstName
+        num += 1
+        final[str(num)] = visit.lastName
+        num += 1
+        final[str(num)] = visit.regTimestamp
+        num += 1
+        final[str(num)] = visit.image
+        num += 1
+        final[str(num)] = visit.idNum
+        num += 1
+    return jsonify(final)
+
+@app.route('/searchnum', methods=['POST'])
+def search_num():
+    cur = db.execute('select firstName, lastName, regTimestamp, image, idNum from visitors order by id desc')
+    vistors = cur.fetchall()
+    vlist = []
+    final = {}
+    num = 0
+    for vistor in vistors:
+        if visitor.idNum == request.form['idNum']:
+            vlist.append(visitor)
+    for visit in vlist:
+        final[str(num)] = visit.firstName
+        num += 1
+        final[str(num)] = visit.lastName
+        num += 1
+        final[str(num)] = visit.regTimestamp
+        num += 1
+        final[str(num)] = visit.image
+        num += 1
+        final[str(num)] = visit.idNum
+        num += 1
+    return jsonify(final)
