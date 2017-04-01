@@ -51,7 +51,7 @@ def close_db(error):
 @app.route('/')
 def home():
     session.clear()
-    return render_template('actuallogin.html')
+    return render_template('login.html')
 
 @app.route('/admin')
 def admin():
@@ -115,8 +115,8 @@ def profile():
         return redirect(url_for('admin'))
     return render_template('profile.html', error=error)
 
-@app.route('/actuallogin', methods=['POST'])
-def actual_login():
+@app.route('/login', methods=['POST'])
+def login():
     db = get_db()
     cur = db.execute('select username, password, admin, security, worker from users order by id desc')
     users = cur.fetchall()
@@ -138,10 +138,10 @@ def actual_login():
         elif row[0] == request.form['username'] and not bcrypt.check_password_hash(row[1], request.form['password']):
             db.commit()
             error = 'invalid password'
-            return render_template('actuallogin.html', error=error)
+            return render_template('login.html', error=error)
     db.commit()
     error = 'invalid username'
-    return render_template('actuallogin.html', error=error)
+    return render_template('login.html', error=error)
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -163,52 +163,23 @@ def register():
         return redirect(url_for('worker'))
     return render_template('register.html', error=error)
 
-@app.route('/login', methods=['POST'])
-def login():
-    db = get_db()
-    cur = db.execute('select username, password, admin, security, worker from users order by id desc')
-    users = cur.fetchall()
-    for row in users:
-        if row[0] == request.form['username'] and bcrypt.check_password_hash(row[1], request.form['password']):
-            if row[2] == "1":
-                db.commit()
-                return jsonify(response=2)
-            elif row[3] == "1":
-                db.commit()
-                return jsonify(response=3)
-            else:
-                db.commit()
-                return jsonify(response=4)
-        elif row[0] == request.form['username'] and not bcrypt.check_password_hash(row[1], request.form['password']):
-            db.commit()
-            return jsonify(response=1)
-    db.commit()
-    return jsonify(response=0)
-
-@app.route('/searchfirst', methods=['POST'])
+@app.route('/searchfirst', methods=['POST', 'GET'])
 def search_first():
-    db = get_db()
-    cur = db.execute('select firstName, lastName, regTimestamp, image, idNum from visitors order by id desc')
-    vistors = cur.fetchall()
-    vlist = []
-    final = {}
-    num = 0
-    for row in vistors:
-        if row[0] == request.form['firstName']:
-            vlist.append(row)
-    for visit in vlist:
-        final[str(num)] = visit[0]
-        num += 1
-        final[str(num)] = visit[1]
-        num += 1
-        final[str(num)] = visit[2]
-        num += 1
-        final[str(num)] = visit[3]
-        num += 1
-        final[str(num)] = visit[4]
-        num += 1
-    db.commit()
-    return jsonify(final)
+    if request.method == 'POST':
+        db = get_db()
+        cur = db.execute('select firstName, lastName, idNum from visitors order by id desc')
+        vistors = cur.fetchall()
+        vlist = []
+        for row in vistors:
+            if row[0] == request.form['firstName']:
+                vlist.append(row)
+                db.commit()
+        return render_template('firstlist.html', users=vlist)
+    return render_template('searchfirst.html')
+
+@app.route('/firstlist', methods=['POST'])
+def first_list():
+    return render_template('firstlist.html')
 
 @app.route('/searchlast', methods=['POST'])
 def search_last():

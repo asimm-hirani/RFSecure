@@ -1,4 +1,19 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>User Search</h2>
+  <h2>User Search Options</h2>
+  <form action="{{ url_for('search_first') }}">
+    <dl>
+      <dd><input type=submit value="First Name Search">
+    </dl>
+  </form>
+  <form action="{{ url_for('search_last') }}">
+    <dl>
+      <dd><input type=submit value="Last Name Search">
+    </dl>
+  </form>
+  <form action="{{ url_for('search_num') }}">
+    <dl>
+      <dd><input type=submit value="Personal ID Search">
+    </dl>
+  </form>
 {% endblock %}

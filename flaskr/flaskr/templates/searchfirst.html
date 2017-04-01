@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>First Name Search</h2>
+  <form action="{{ url_for('search_first') }}" method=post>
+    <dl>
+      <dt>First Name:
+      <dd><input type=text name=firstName>
+      <dd><input type=submit value="Search">
+    </dl>
+  </form>
+{% endblock %}

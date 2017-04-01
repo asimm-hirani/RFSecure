@@ -24,6 +24,8 @@ create table visitors (
     image text not null,
     idNum text not null
 );
+insert into visitors (id, firstName, lastName, regTimestamp, image, idNum)
+values (0, 'Bob', 'Builder', '2014-10-18 21:31:12', 'img.jpeg', '903567890');
 create table logs (
     id integer primary key autoincrement,
     location text not null,
