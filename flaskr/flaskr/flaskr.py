@@ -49,6 +49,7 @@ def close_db(error):
 
 @app.route('/')
 def home():
+    session.clear()
     return render_template('actuallogin.html')
 
 @app.route('/admin')
@@ -224,3 +225,9 @@ def search_num():
         num += 1
     db.commit()
     return jsonify(final)
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    flash('You were logged out')
+    return redirect(url_for('home'))
