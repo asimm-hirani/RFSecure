@@ -22,10 +22,11 @@ create table visitors (
     lastName text not null,
     regTimestamp text not null,
     image text not null,
-    idNum text not null
+    idNum text not null,
+    access text not null
 );
-insert into visitors (id, firstName, lastName, regTimestamp, image, idNum)
-values (0, 'Bob', 'Builder', '2014-10-18 21:31:12', 'img.jpeg', '903567890');
+insert into visitors (id, firstName, lastName, regTimestamp, image, idNum, access)
+values (0, 'Bob', 'Builder', '2014-10-18 21:31:12', 'img.jpeg', '903567890', 'employee');
 create table logs (
     id integer primary key autoincrement,
     location text not null,
@@ -34,5 +35,6 @@ create table logs (
 );
 create table levels (
     id integer primary key autoincrement,
+    idNum text not null,
     access text[]
 );

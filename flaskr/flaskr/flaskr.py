@@ -71,14 +71,6 @@ def worker():
     session['back'] = False
     return render_template('worker.html')
 
-@app.route('/add', methods=['POST'])
-def add_visit():
-    db = get_db()
-    db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum) values (?, ?, ?, ?, ?)',
-                 [request.form['firstName'], request.form['lastName'], request.form['timestamp'], request.form['image'], request.form['id']])
-    db.commit()
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-
 @app.route('/profile', methods=['POST', 'GET'])
 def profile():
     error = None
@@ -146,8 +138,13 @@ def login():
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     error = None
+    levels = []
+    viable = ['visitor', 'employee']
     session['back'] = True
     if request.method == 'POST':
+        if request.form['access'] not in viable:
+            error = 'invalid access level'
+            return render_template('register.html', error=error)
         db = get_db()
         cur = db.execute('select numID from visitors order by id desc')
         visitors = cur.fetchall()
@@ -155,8 +152,13 @@ def register():
             if row[0] == request.form['number']:
                 error = 'duplicate personal ID'
                 return render_template('register.html', error=error)
-        db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum) values (?, ?, ?, ?, ?)',
-            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number']])
+        db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum, access) values (?, ?, ?, ?, ?, ?)',
+            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number']], request.form['access'])
+        if request.form['access'] == 'visitor':
+            levels = ['1', '0']
+        elif request.form['access'] == 'employee':
+            levels = ['1', '1']
+        db.execute('insert into levels (idNum, access) values (?, ?)', [request.form['number'], levels])
         db.commit()
         flash('New visitor was successfully added')
         session['back'] = False
@@ -168,7 +170,7 @@ def search_first():
     session['back'] = True
     if request.method == 'POST':
         db = get_db()
-        cur = db.execute('select firstName, lastName, idNum from visitors order by id desc')
+        cur = db.execute('select firstName, lastName, idNum, access from visitors order by id desc')
         vistors = cur.fetchall()
         vlist = []
         for row in vistors:
@@ -183,7 +185,7 @@ def search_last():
     session['back'] = True
     if request.method == 'POST':
         db = get_db()
-        cur = db.execute('select firstName, lastName, idNum from visitors order by id desc')
+        cur = db.execute('select firstName, lastName, idNum, access from visitors order by id desc')
         vistors = cur.fetchall()
         vlist = []
         for row in vistors:
@@ -198,7 +200,7 @@ def search_num():
     session['back'] = True
     if request.method == 'POST':
         db = get_db()
-        cur = db.execute('select firstName, lastName, idNum from visitors order by id desc')
+        cur = db.execute('select firstName, lastName, idNum, access from visitors order by id desc')
         vistors = cur.fetchall()
         vlist = []
         for row in vistors:
