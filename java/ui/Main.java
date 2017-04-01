@@ -29,6 +29,7 @@ import javafx.scene.text.*;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import serial.SerialReader;
 import webio.RFSecureClient;
 
 public class Main extends Application {
@@ -95,7 +96,7 @@ public class Main extends Application {
                 String user = userTextField.getText();
                 String pass = pwBox.getText();
                 client = new RFSecureClient(user, pass);
-                int type = 0;
+                int type = 2;
                 try { type = client.loginUser(); } catch (Exception t) {
                     t.printStackTrace();
                 }
@@ -151,8 +152,10 @@ public class Main extends Application {
 
 
         Button btn = new Button("Sign out");
-        btn.setAlignment(Pos.TOP_RIGHT);
-        grid.add(btn, 1, 0);
+        HBox hbBtn = new HBox(10);
+        hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
+        hbBtn.getChildren().add(btn);
+        grid.add(hbBtn, 1, 0);
         btn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -162,13 +165,21 @@ public class Main extends Application {
         });
 
         Button btn2 = new Button("Register Visitor");
-        btn2.setAlignment(Pos.BOTTOM_RIGHT);
-        grid.add(btn2, 1, 5);
+        HBox hbBtn2 = new HBox(10);
+        hbBtn2.setAlignment(Pos.BOTTOM_RIGHT);
+        hbBtn2.getChildren().add(btn2);
+        grid.add(hbBtn2, 1, 5);
         btn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent e) {
-                setupStartScene();
+                SerialReader sr = new SerialReader();
+                String keyID = sr.getCardID();
+                try {
+                    client.checkInVisitor(firstName.getText(), lastName.getText(), idNumber.getText(), keyID);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
