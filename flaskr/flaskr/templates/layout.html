@@ -4,7 +4,9 @@
 <div class=page>
   <h1>RFSecure</h1>
   <div class=metanav>
-      <a href="{{ url_for('profile') }}">create new user</a>
+  {% if session.logged_in %}
+      <a href="{{ url_for('profile') }}">Create New User</a>
+  {% endif %}
   </div>
   {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>

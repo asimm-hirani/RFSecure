@@ -48,6 +48,10 @@ def close_db(error):
         g.sqlite_db.close()
 
 @app.route('/')
+def home():
+    return render_template('actuallogin.html')
+
+@app.route('/admin')
 def admin():
     db = get_db()
     cur = db.execute('select username, password from users order by id desc')
@@ -105,6 +109,8 @@ def actual_login():
         if row[0] == request.form['username'] and bcrypt.check_password_hash(row[1], request.form['password']):
             if row[2] == "1":
                 db.commit()
+                session['logged_in'] = True
+                flash('You were logged in')
                 return redirect(url_for('admin'))
             elif row[3] == "1":
                 db.commit()
