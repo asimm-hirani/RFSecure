@@ -11,11 +11,11 @@
       </dl>
     </form>
   {% endif %}
-  <ul class=entries>
-  {% for entry in entries %}
-    <li><h2>{{ entry.title }}</h2>{{ entry.text|safe }}
+  <ul class=users>
+  {% for user in users %}
+    <li><h2>{{ user.username }}</h2>{{ user.password }}
   {% else %}
-    <li><em>Unbelievable.  No entries here so far</em>
+    <li><em>No Users Found</em>
   {% endfor %}
   </ul>
 {% endblock %}
