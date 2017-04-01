@@ -68,10 +68,11 @@ def profile():
     admin = None
     security = None
     worker = None
+    db = get_db()
     cur = db.execute('select username from users order by id desc')
     users = cur.fetchall()
-    for user in users:
-        if user.username == request.form['username']:
+    for row in users:
+        if row[0] == request.form['username']:
             error = 'invalid username'
             return render_template('profile.html', error=error)
     if request.form['type'] == "admin":
@@ -86,9 +87,8 @@ def profile():
         admin = "0"
         security = "0"
         worker = "1"
-    db = get_db()
     db.execute('insert into users (username, password, admin, security, worker) values (?, ?, ?, ?, ?)',
-                 [request.form['username'], pw_hash = bcrypt.generate_password_hash(request.form['password']).decode('utf-8'), admin, security, worker])
+                 [request.form['username'], bcrypt.generate_password_hash(request.form['password']).decode('utf-8'), admin, security, worker])
     db.commit()
     flash('New user was successfully added')
     return redirect(url_for('admin'))
@@ -97,15 +97,15 @@ def profile():
 def login():
     cur = db.execute('select username, password, admin, security, worker from users order by id desc')
     users = cur.fetchall()
-    for user in users:
-        if user.username == request.form['username'] and bcrypt.check_password_hash(user.password, request.form['password']):
-            if user.admin == "1":
+    for row in users:
+        if row[0] == request.form['username'] and bcrypt.check_password_hash(row[1], request.form['password']):
+            if row[2] == "1":
                 return jsonify(response=2)
-            elif user.security == "1":
+            elif row[3] == "1":
                 return jsonify(response=3)
             else:
                 return jsonify(response=4)
-        elif user.username == request.form['username'] and !bcrypt.check_password_hash(user.password, request.form['password']):
+        elif row[0] == request.form['username'] and not bcrypt.check_password_hash(row[1], request.form['password']):
             return jsonify(response=1)
     return jsonify(response=0)
 
@@ -116,19 +116,19 @@ def search_first():
     vlist = []
     final = {}
     num = 0
-    for vistor in vistors:
-        if visitor.firstName == request.form['firstName']:
-            vlist.append(visitor)
+    for row in vistors:
+        if row[0] == request.form['firstName']:
+            vlist.append(row)
     for visit in vlist:
-        final[str(num)] = visit.firstName
+        final[str(num)] = visit[0]
         num += 1
-        final[str(num)] = visit.lastName
+        final[str(num)] = visit[1]
         num += 1
-        final[str(num)] = visit.regTimestamp
+        final[str(num)] = visit[2]
         num += 1
-        final[str(num)] = visit.image
+        final[str(num)] = visit[3]
         num += 1
-        final[str(num)] = visit.idNum
+        final[str(num)] = visit[4]
         num += 1
     return jsonify(final)
 
@@ -139,19 +139,19 @@ def search_last():
     vlist = []
     final = {}
     num = 0
-    for vistor in vistors:
-        if visitor.lastName == request.form['lastName']:
-            vlist.append(visitor)
+    for row in vistors:
+        if row[1] == request.form['lastName']:
+            vlist.append(row)
     for visit in vlist:
-        final[str(num)] = visit.firstName
+        final[str(num)] = visit[0]
         num += 1
-        final[str(num)] = visit.lastName
+        final[str(num)] = visit[1]
         num += 1
-        final[str(num)] = visit.regTimestamp
+        final[str(num)] = visit[2]
         num += 1
-        final[str(num)] = visit.image
+        final[str(num)] = visit[3]
         num += 1
-        final[str(num)] = visit.idNum
+        final[str(num)] = visit[4]
         num += 1
     return jsonify(final)
 
@@ -163,17 +163,17 @@ def search_num():
     final = {}
     num = 0
     for vistor in vistors:
-        if visitor.idNum == request.form['idNum']:
+        if visitor[4] == request.form['idNum']:
             vlist.append(visitor)
     for visit in vlist:
-        final[str(num)] = visit.firstName
+        final[str(num)] = visit[0]
         num += 1
-        final[str(num)] = visit.lastName
+        final[str(num)] = visit[1]
         num += 1
-        final[str(num)] = visit.regTimestamp
+        final[str(num)] = visit[2]
         num += 1
-        final[str(num)] = visit.image
+        final[str(num)] = visit[3]
         num += 1
-        final[str(num)] = visit.idNum
+        final[str(num)] = visit[4]
         num += 1
     return jsonify(final)
