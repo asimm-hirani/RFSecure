@@ -46,11 +46,11 @@ def close_db(error):
         g.sqlite_db.close()
 
 @app.route('/')
-def show_entries():
+def admin():
     db = get_db()
     cur = db.execute('select username, password from users order by id desc')
-    entries = cur.fetchall()
-    return render_template('show_entries.html', entries=entries)
+    users = cur.fetchall()
+    return render_template('admin.html', users=users)
 
 @app.route('/add', methods=['POST'])
 def add_visit():
@@ -60,8 +60,8 @@ def add_visit():
     db.commit()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-@app.route('/insert', methods=['POST'])
-def add_user():
+@app.route('/profile', methods=['POST', 'GET'])
+def profile():
     admin = None
     security = None
     worker = None
@@ -82,7 +82,7 @@ def add_user():
                  [request.form['username'], request.form['password'], admin, security, worker])
     db.commit()
     flash('New user was successfully added')
-    return redirect(url_for('admin'))
+    return render_template('profile.html')
 
 @app.route('/login', methods=['POST'])
 def login():
