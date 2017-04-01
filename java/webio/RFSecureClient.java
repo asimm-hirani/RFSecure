@@ -21,7 +21,12 @@ public class RFSecureClient {
     String username;
     String password;
 
-    public int loginUser() {
+    public RFSecureClient(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public int loginUser() throws Exception{
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httpPost = new HttpPost(url);
@@ -30,23 +35,25 @@ public class RFSecureClient {
             nvps.add(new BasicNameValuePair("password", password));
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
             CloseableHttpResponse response2 = httpclient.execute(httpPost);
-
+            int returnval = 0;
             try {
                 System.out.println(response2.getStatusLine());
                 HttpEntity entity2 = response2.getEntity();
                 // do something useful with the response body
                 // and ensure it is fully consumed
+                returnval = Integer.parseInt(entity2.toString());
                 EntityUtils.consume(entity2);
             } finally {
                 response2.close();
+                return returnval;
             }
         } finally {
             httpclient.close();
         }
     }
 
-    public int checkInVisitor(String fName,
-        String lName, String id, String keyID) {
+    public void checkInVisitor(String fName,
+        String lName, String id, String keyID) throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httpPost = new HttpPost(url);
