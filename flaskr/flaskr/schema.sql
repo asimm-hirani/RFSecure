@@ -10,7 +10,7 @@ create table users (
 );
 insert into users (id, username, password, admin, security, worker)
 values (1, 'test', '12345', '1', '0', '0');
-create table people (
+create table visitors (
     id integer primary key autoincrement,
     certificate bigint,
     firstName text not null,

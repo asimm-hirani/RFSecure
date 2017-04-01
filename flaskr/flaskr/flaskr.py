@@ -53,15 +53,36 @@ def show_entries():
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/add', methods=['POST'])
-def add_entry():
-    if not session.get('logged_in'):
-        abort(401)
+def add_visit():
     db = get_db()
-    db.execute('insert into users (username, password) values (?, ?)',
-                 [request.form['title'], request.form['text']])
+    db.execute('insert into visitors (certificate, firstName, lastName, regTimestamp, image, idNum) values (?, ?, ?, ?, ?, ?)',
+                 [request.form['certificate'], request.form['firstName'], request.form['lastName'], request.form['timestamp'], request.form['image'], request.form['id']])
     db.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/insert', methods=['POST'])
+def add_user():
+    admin = None
+    security = None
+    worker = None
+    if request.form['type'] == "admin":
+        admin = "1"
+        security = "0"
+        worker = "0"
+    elif request.form['type'] == "security":
+        admin = "0"
+        security = "1"
+        worker = "0"
+    else:
+        admin = "0"
+        security = "0"
+        worker = "1"
+    db = get_db()
+    db.execute('insert into users (username, password, admin, security, worker) values (?, ?, ?, ?, ?)',
+                 [request.form['username'], request.form['password'], admin, security, worker])
+    db.commit()
+    flash('New user was successfully added')
+    return redirect(url_for('admin'))
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -78,9 +99,3 @@ def login():
         elif user.username == request.form['username'] and user.password != request.form['password']:
             return jsonify(response=1)
     return jsonify(response=0)
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
-    return redirect(url_for('show_entries'))
