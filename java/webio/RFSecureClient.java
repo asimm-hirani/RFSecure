@@ -1,48 +1,85 @@
-package webio;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.PostMethod;
 
 public class RFSecureClient {
-    public static final String apiURL = "www.myrfsecure.com/api/"
 
-    private String username;
-    private String password;
+     static String url =
+         "http://www.rfsecure.org/api/";
+    String username;
+    String password;
 
-    private boolean isAuth = false;
+    public int loginUser() {
 
-    public RFSecureClient(String username, String password) {
-        this.username = username;
-        this.password = password;
+        //Instantiate an HttpClient
+        HttpClient client = new HttpClient();
+
+        //Instantiate a POST HTTP method
+        PostMethod method = new PostMethod(url);
+        method.setRequestHeader("Content-type",
+                "text/xml; charset=ISO-8859-1");
+
+        //Define name-value pairs to set into the QueryString
+        NameValuePair nvp1= new NameValuePair("username",username);
+        NameValuePair nvp2= new NameValuePair("password",password);
+
+        method.setQueryString(new NameValuePair[]{nvp1,nvp2});
+
+        try{
+            int statusCode = client.executeMethod(method);
+
+            System.out.println("Status Code = "+statusCode);
+            System.out.println("QueryString>>> "+method.getQueryString());
+            System.out.println("Status Text>>>"
+                  +HttpStatus.getStatusText(statusCode));
+
+            //Get data as a String
+            return Integer.parseInt(method.getResponseBodyAsString());
+
+            //release connection
+            method.releaseConnection();
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    public int checkInVisitor(String fName,
+        String lName, String id, String keyID) {
 
+        HttpClient client = new HttpClient();
 
-    public int loginUser(String username, String password) {
-        this.username = username;
-        this.password = password;
+        //Instantiate a POST HTTP method
+        PostMethod method = new PostMethod(url);
+        method.setRequestHeader("Content-type",
+                "text/xml; charset=ISO-8859-1");
 
+        //Define name-value pairs to set into the QueryString
+        NameValuePair nvp1= new NameValuePair("username",username);
+        NameValuePair nvp2= new NameValuePair("password",password);
 
-        String urlParm = "username="+username+",password="+password;
+        method.setQueryString(new NameValuePair[]{nvp1,nvp2});
 
-        URL obj = new URL(apiURL);
-        HttpResponse response = HttpRequest
-          .create(obj)
-          .body(fromString(urlParm))
-          .POST().response();
+        try{
+            int statusCode = client.executeMethod(method);
 
-        return Integer.parseInt(response.toString());
+            System.out.println("Status Code = "+statusCode);
+            System.out.println("QueryString>>> "+method.getQueryString());
+            System.out.println("Status Text>>>"
+                  +HttpStatus.getStatusText(statusCode));
 
+            //Get data as a String
+            return Integer.parseInt(method.getResponseBodyAsString());
+
+            //release connection
+            method.releaseConnection();
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
     }
-
-
-    public void addVisitor(String fName, String lName, String id, String token) {
-
-    }
-
 }
