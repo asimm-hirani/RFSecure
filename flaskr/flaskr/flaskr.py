@@ -55,8 +55,8 @@ def show_entries():
 @app.route('/add', methods=['POST'])
 def add_visit():
     db = get_db()
-    db.execute('insert into visitors (certificate, firstName, lastName, regTimestamp, image, idNum) values (?, ?, ?, ?, ?, ?)',
-                 [request.form['certificate'], request.form['firstName'], request.form['lastName'], request.form['timestamp'], request.form['image'], request.form['id']])
+    db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum) values (?, ?, ?, ?, ?)',
+                 [request.form['firstName'], request.form['lastName'], request.form['timestamp'], request.form['image'], request.form['id']])
     db.commit()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
