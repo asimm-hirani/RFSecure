@@ -3,7 +3,10 @@ drop table if exists people;
 create table users (
     id integer primary key autoincrement,
     username text not null,
-    'password' text not null
+    password text not null,
+    admin text not null,
+    security text not null,
+    worker text not null
 );
 create table people (
     id integer primary key autoincrement,
