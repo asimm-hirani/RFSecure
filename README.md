@@ -1,6 +1,6 @@
 # RFSecure
 
-cd 
+cd flaskr
 
 pip install --editable .
 
