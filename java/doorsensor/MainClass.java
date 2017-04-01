@@ -10,7 +10,9 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-import java.util.Enumeration;
+    import webio.RFSecureClient;
+
+    import java.util.Enumeration;
 
 
     public class MainClass implements SerialPortEventListener {
@@ -102,9 +104,14 @@ import java.util.Enumeration;
          * Handle an event on the serial port. Read the data and print it.
          */
         public synchronized void serialEvent(SerialPortEvent oEvent) {
+            RFSecureClient client = new RFSecureClient();
             if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
                 try {
                     String inputLine=input.readLine();
+                    client.logEvent(inputLine.split("&")[2],
+                            inputLine.split("&")[0]);
+                    client.logEvent(inputLine.split("&")[3],
+                            inputLine.split("&")[1]);
                     System.out.println(inputLine);
                 } catch (Exception e) {
                     System.err.println(e.toString());

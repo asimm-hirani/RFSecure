@@ -58,7 +58,7 @@ public class Main {
                         //String[] stringArr = string.split("\n")[1].split("&");
                         //client.logEvent(stringArr[0], stringArr[1]);
                     } catch (Exception e) {
-                        e.printStackTrace();;
+                        e.printStackTrace();
                     }
                 }
             }, new Integer('\n'));

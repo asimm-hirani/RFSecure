@@ -17,7 +17,7 @@ import org.apache.http.util.EntityUtils;
 public class RFSecureClient {
 
      static String url =
-         "http://www.rfsecure.org/api/";
+         "http://www.rfsecure.net/api/";
     String username;
     String password;
 
