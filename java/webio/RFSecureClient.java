@@ -21,6 +21,10 @@ public class RFSecureClient {
     String username;
     String password;
 
+    public RFSecureClient() {
+        this("", "");
+    }
+
     public RFSecureClient(String username, String password) {
         this.username = username;
         this.password = password;
@@ -63,6 +67,30 @@ public class RFSecureClient {
             nvps.add(new BasicNameValuePair("firstName",fName));
             nvps.add(new BasicNameValuePair("lName",lName));
             nvps.add(new BasicNameValuePair("id",id));
+            nvps.add(new BasicNameValuePair("keyID",keyID));
+            httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+            CloseableHttpResponse response2 = httpclient.execute(httpPost);
+
+            try {
+                System.out.println(response2.getStatusLine());
+                HttpEntity entity2 = response2.getEntity();
+                // do something useful with the response body
+                // and ensure it is fully consumed
+                EntityUtils.consume(entity2);
+            } finally {
+                response2.close();
+            }
+        } finally {
+            httpclient.close();
+        }
+    }
+
+    public void logEvent(String keyID, String sensorID) throws Exception {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        try {
+            HttpPost httpPost = new HttpPost(url);
+            List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+            nvps.add(new BasicNameValuePair("sensorID",sensorID));
             nvps.add(new BasicNameValuePair("keyID",keyID));
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
             CloseableHttpResponse response2 = httpclient.execute(httpPost);

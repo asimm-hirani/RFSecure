@@ -10,8 +10,12 @@ public class SerialReader {
     public static final String DELIM = "\n";
 
     public SerialReader() {
+        this(0);
+    }
+
+    public SerialReader(int n) {
         try {
-            serial = new SerialPort(SerialPortList.getPortNames()[0]);
+            serial = new SerialPort(SerialPortList.getPortNames()[n]);
             System.out.println("Opening Serial Port: " + serial.openPort());
             serial.setParams(9600, 8, 1, 0);
         } catch (SerialPortException e) {
@@ -21,6 +25,14 @@ public class SerialReader {
     }
 
     public String getCardID() {
+        return getMessage()[0];
+    }
+
+    public String getSensorID() {
+        return getMessage()[1];
+    }
+
+    private String[] getMessage() {
         String id = "";
         String oldID = " ";
         try {
@@ -32,7 +44,7 @@ public class SerialReader {
             e.printStackTrace();
             System.exit(-1);
         }
-        return id;
+        return id.split("&");
     }
 
     public void finalize() throws Throwable {
@@ -57,4 +69,5 @@ public class SerialReader {
         String returnString = oldSerialData + serialData;
         return returnString.split(delim)[1];
     }
+
 }
