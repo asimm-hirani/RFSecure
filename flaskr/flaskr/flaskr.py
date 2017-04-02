@@ -79,9 +79,9 @@ def home():
 def admin():
     session['back'] = False
     db = get_db()
-    cur = db.execute('select username, password from users order by id desc')
+    cur = db.execute('select location, regTimestamp, cardID, flag from logs order by id desc')
     users = cur.fetchall()
-    return render_template('admin.html', users=users)
+    return render_template('admin.html', logs=logs)
 
 @app.route('/security')
 @login_required
@@ -238,8 +238,8 @@ def log():
     error = None
     number = None
     session['back'] = True
+    db = get_db()
     if request.method == 'POST':
-        db = get_db()
         cur = db.execute('select idNum, cardID from visitors order by id desc')
         visitors = cur.fetchall()
         for row in visitors:
