@@ -80,7 +80,7 @@ def admin():
     session['back'] = False
     db = get_db()
     cur = db.execute('select location, regTimestamp, cardID, flag from logs order by id desc')
-    users = cur.fetchall()
+    logs = cur.fetchall()
     return render_template('admin.html', logs=logs)
 
 @app.route('/security')
