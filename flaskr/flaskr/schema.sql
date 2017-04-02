@@ -23,10 +23,11 @@ create table visitors (
     regTimestamp text not null,
     image text not null,
     idNum text not null,
-    access text not null
+    access text not null,
+    cardID text not null
 );
-insert into visitors (id, firstName, lastName, regTimestamp, image, idNum, access)
-values (0, 'Bob', 'Builder', '2014-10-18 21:31:12', 'img.jpeg', '903567890', 'employee');
+insert into visitors (id, firstName, lastName, regTimestamp, image, idNum, access, cardID)
+values (0, 'George', 'Burdell', '2014-10-18 21:31:12', 'img.jpeg', '903567890', 'employee', 'placeholder');
 create table logs (
     id integer primary key autoincrement,
     location text not null,

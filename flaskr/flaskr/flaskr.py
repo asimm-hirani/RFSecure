@@ -3,18 +3,44 @@ import datetime
 import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
+from flask_login import LoginManager
+from flask_login import login_required
+from flask_login import login_user
+from flask_login import UserMixin
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 bcrypt = Bcrypt(app)
 app.config.from_object(__name__)
 
-# Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'flaskr.db'),
     SECRET_KEY='dogeface'
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+
+class User(UserMixin):
+    pass
+
+@login_manager.user_loader
+def load_user(user_id):
+    db = get_db()
+    cur = db.execute('select username, password from users order by id desc')
+    users = cur.fetchall()
+    for row in users:
+        if bcrypt.check_password_hash(row[1], user_id):
+            user = User()
+            user.id = row[1]
+            return user
+    return
+    # if user_id not in users[0]bcrypt.check_password_hash(row[1], request.form['password']):
+    #     return
+    # user = User()
+    # user.id = user_id
+    # return user
 
 def connect_db():
     """Connects to the specific database."""
@@ -54,6 +80,7 @@ def home():
     return render_template('login.html')
 
 @app.route('/admin')
+@login_required
 def admin():
     session['back'] = False
     db = get_db()
@@ -62,16 +89,19 @@ def admin():
     return render_template('admin.html', users=users)
 
 @app.route('/security')
+@login_required
 def security():
     session['back'] = False
     return render_template('security.html')
 
 @app.route('/worker')
+@login_required
 def worker():
     session['back'] = False
     return render_template('worker.html')
 
 @app.route('/profile', methods=['POST', 'GET'])
+@login_required
 def profile():
     error = None
     admin = None
@@ -117,15 +147,26 @@ def login():
             if row[2] == "1":
                 db.commit()
                 session['admin'] = True
+                user = User()
+                user.id = request.form['password']
+                login_user(user)
                 flash('You were logged in')
                 return redirect(url_for('admin'))
             elif row[3] == "1":
                 db.commit()
                 session['security'] = True
+                user = User()
+                user.id = request.form['password']
+                login_user(user)
+                flash('You were logged in')
                 return redirect(url_for('security'))
             else:
                 db.commit()
                 session['worker'] = True
+                user = User()
+                user.id = request.form['password']
+                login_user(user)
+                flash('You were logged in')
                 return redirect(url_for('worker'))
         elif row[0] == request.form['username'] and not bcrypt.check_password_hash(row[1], request.form['password']):
             db.commit()
@@ -136,6 +177,7 @@ def login():
     return render_template('login.html', error=error)
 
 @app.route('/register', methods=['POST', 'GET'])
+@login_required
 def register():
     error = None
     levels = []
@@ -152,13 +194,13 @@ def register():
             if row[0] == request.form['number']:
                 error = 'duplicate personal ID'
                 return render_template('register.html', error=error)
-        db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum, access) values (?, ?, ?, ?, ?, ?)',
-            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number']], request.form['access'])
+        db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum, access, cardID) values (?, ?, ?, ?, ?, ?)',
+            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form["image"], request.form['number']], request.form['access'], 'placeholder')
         if request.form['access'] == 'visitor':
             levels = ['1', '0']
         elif request.form['access'] == 'employee':
             levels = ['1', '1']
-        db.execute('insert into levels (idNum, access) values (?, ?)', [request.form['number'], levels])
+        db.execute('insert into levels (cardID, access) values (?, ?)', ['placeholder', levels])
         db.commit()
         flash('New visitor was successfully added')
         session['back'] = False
@@ -166,6 +208,7 @@ def register():
     return render_template('register.html', error=error)
 
 @app.route('/searchfirst', methods=['POST', 'GET'])
+@login_required
 def search_first():
     session['back'] = True
     if request.method == 'POST':
@@ -181,6 +224,7 @@ def search_first():
     return render_template('searchfirst.html')
 
 @app.route('/searchlast', methods=['POST', 'GET'])
+@login_required
 def search_last():
     session['back'] = True
     if request.method == 'POST':
@@ -196,6 +240,7 @@ def search_last():
     return render_template('searchlast.html')
 
 @app.route('/searchnum', methods=['POST', 'GET'])
+@login_required
 def search_num():
     session['back'] = True
     if request.method == 'POST':
@@ -211,5 +256,12 @@ def search_num():
     return render_template('searchnum.html')
 
 @app.route('/searchlist', methods=['POST'])
+@login_required
 def search_list():
     return render_template('searchlist.html')
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(somewhere)
