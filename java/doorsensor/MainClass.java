@@ -16,12 +16,75 @@ import gnu.io.SerialPortEventListener;
 
 
     public class MainClass implements SerialPortEventListener {
+
+        private class COMHandler extends Runnable
+                implements SerialPortEventListener {
+
+            SerialPort comPort;
+            BufferedReader input;
+            OutputStream output;
+            boolean isMotionDevice;
+            String oldLine;
+            String inputLine;
+
+            public void initialize() {
+                input = new BufferedReader(new InputStreamReader(comPort.getInputStream()));
+                output = comPort.getOutputStream();
+
+                // add event listeners
+                comPort.addEventListener(this);
+                comPort.notifyOnDataAvailable(true);
+            }
+
+            public void run() {
+
+            }
+
+            public synchronized void serialEvent(SerialPortEvent oEvent) {
+                if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
+                    try {
+                        oldLine = inputLine;
+                        inputLine=input.readLine();
+                        if (!isMotionDevice) {
+                            RFSecureClient.logEvent(inputLine.split("&")[1],
+                                inputLine.split("&")[0]);
+                        } else {
+                            if (oldLine.compareTo(inputLine) == 0
+                                && oldLine.split('&')) {
+                            }
+                        }
+
+                        System.out.println(inputLine);
+                    } catch (Exception e) {
+                        System.err.println(e.toString());
+                    }
+            }
+
+            public COMHandler(SerialPort comPort) {
+                this.comPort = comPort;
+            }
+
+            public COMHandler(SerialPort comPort, boolean isMotionDevice) {
+                this(comPort);
+                this.isMotionDevice = isMotionDevice;
+            }
+
+            public synchronized void close() {
+                if (comPort != null) {
+                    serialPort.removeEventListener();
+                    serialPort.close();
+                }
+            }
+        }
+
         SerialPort serialPort;
         /** The port we're normally going to use. */
         private static final String PORT_NAMES[] = {
                 //"/dev/tty.usbserial-A9007UX1", // Mac OS X
                 //"/dev/ttyACM0", // Raspberry Pi
                 //"/dev/ttyUSB0", // Linux
+                "COM1",
+                "COM2",
                 "COM3",
                 "COM4",
                 "COM5",
@@ -39,9 +102,9 @@ import gnu.io.SerialPortEventListener;
         /** The output stream to the port */
         private OutputStream output;
         /** Milliseconds to block while waiting for port open */
-        private static final int TIME_OUT = 2000;
+        public static final int TIME_OUT = 2000;
         /** Default bits per second for COM port. */
-        private static final int DATA_RATE = 9600;
+        public static final int DATA_RATE = 9600;
 
         public void initialize() {
             // the next line is for Raspberry Pi and
@@ -104,7 +167,6 @@ import gnu.io.SerialPortEventListener;
          * Handle an event on the serial port. Read the data and print it.
          */
         public synchronized void serialEvent(SerialPortEvent oEvent) {
-            RFSecureClient client = new RFSecureClient();
             if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
                 try {
                     String inputLine=input.readLine();
@@ -134,4 +196,3 @@ import gnu.io.SerialPortEventListener;
             System.out.println("Started");
         }
     }
-
