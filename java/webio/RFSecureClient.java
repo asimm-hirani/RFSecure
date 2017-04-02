@@ -24,7 +24,7 @@ public class RFSecureClient {
     public static void logEvent(String sensorID, String keyID) throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
-            HttpPost httpPost = new HttpPost(url);
+            HttpPost httpPost = new HttpPost(urlSensor);
             List <NameValuePair> nvps = new ArrayList <NameValuePair>();
             nvps.add(new BasicNameValuePair("sensorID",sensorID));
             nvps.add(new BasicNameValuePair("keyID",keyID));
@@ -47,12 +47,12 @@ public class RFSecureClient {
     public static void logMovementEvent(String sensorID) throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
-            HttpPost httpPost = new HttpPost(url);
+            HttpPost httpPost = new HttpPost(urlMotion);
             List <NameValuePair> nvps = new ArrayList <NameValuePair>();
             nvps.add(new BasicNameValuePair("sensorID",sensorID));
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
             CloseableHttpResponse response2 = httpclient.execute(httpPost);
-
+            System.out.print(httpclient);
             try {
                 System.out.println(response2.getStatusLine());
                 HttpEntity entity2 = response2.getEntity();
