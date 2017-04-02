@@ -16,8 +16,10 @@ import org.apache.http.util.EntityUtils;
 
 public class RFSecureClient {
 
-    static String url =
-         "http://www.rfsecure.net/api/";
+    static String urlSensor =
+         "http://www.rfsecure.net/sensor/";
+    static String urlMotion =
+            "http://www.rfsecure.net/motion/";
 
     public static void logEvent(String sensorID, String keyID) throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
