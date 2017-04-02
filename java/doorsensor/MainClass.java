@@ -37,7 +37,7 @@ import gnu.io.SerialPortEventListener;
             }
 
             public void run() {
-
+                this.initialize();
             }
 
             public synchronized void serialEvent(SerialPortEvent oEvent) {
@@ -45,15 +45,20 @@ import gnu.io.SerialPortEventListener;
                     try {
                         oldLine = inputLine;
                         inputLine=input.readLine();
-                        if (!isMotionDevice) {
-                            RFSecureClient.logEvent(inputLine.split("&")[1],
-                                inputLine.split("&")[0]);
-                        } else {
+                        String[] event = inputLine.split("&");
+                        if (event.length == 4) {
+                            boolean e1 = event[1].compareTo("1") == 0;
+                            boolean e2 = event[3].compareTo("1") == 0;
+                            )
                             if (oldLine.compareTo(inputLine) == 0
-                                && oldLine.split('&')) {
+                                && (e1 || e2) {
+                                RFSecureClient.logMovementEvent((e1) ?
+                                    event[0] : event[2]));
                             }
+                        } else {
+                            RFSecureClient.logEvent(event[0],
+                                event[1]);
                         }
-
                         System.out.println(inputLine);
                     } catch (Exception e) {
                         System.err.println(e.toString());
@@ -62,11 +67,6 @@ import gnu.io.SerialPortEventListener;
 
             public COMHandler(SerialPort comPort) {
                 this.comPort = comPort;
-            }
-
-            public COMHandler(SerialPort comPort, boolean isMotionDevice) {
-                this(comPort);
-                this.isMotionDevice = isMotionDevice;
             }
 
             public synchronized void close() {
@@ -98,13 +98,9 @@ import gnu.io.SerialPortEventListener;
          * converting the bytes into characters
          * making the displayed results codepage independent
          */
-        private BufferedReader input;
-        /** The output stream to the port */
-        private OutputStream output;
-        /** Milliseconds to block while waiting for port open */
         public static final int TIME_OUT = 2000;
         /** Default bits per second for COM port. */
-        public static final int DATA_RATE = 9600;
+        public static final int DATA_RATE = 115200;
 
         public void initialize() {
             // the next line is for Raspberry Pi and
@@ -115,12 +111,29 @@ import gnu.io.SerialPortEventListener;
             Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
 
             //First, Find an instance of serial port as set in PORT_NAMES.
+            SerialPort s = null;
+            Runnable[] comPortHandlers = new Runnable[PORT_NAMES.length];
+            Thread[] handlerThreads = new Thread[comPortHandlers.length];
             while (portEnum.hasMoreElements()) {
                 CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
-                for (String portName : PORT_NAMES) {
-                    if (currPortId.getName().equals(portName)) {
+                for (int i = 0; i < PORT_NAMES.length; i++) {
+                    if (currPortId.getName().equals(PORT_NAMES[i])) {
                         portId = currPortId;
-                        break;
+                        try {
+                            s = portId.open(this.getClass().getName(),
+                                TIME_OUT);
+                            s.setSerialPortParams(DATA_RATE,
+                                SerialPort.DATABITS_8,
+                                SerialPort.STOPBITS_1,
+                                SerialPort.PARITY_NONE);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            comPortHandlers[i] = new COMHandler(s);
+                            handlerThreads[i] = new Thread(comPortHandlers[i]);
+                            handlerThreads[i].start();
+                        }
                     }
                 }
             }
@@ -128,59 +141,8 @@ import gnu.io.SerialPortEventListener;
                 System.out.println("Could not find COM port.");
                 return;
             }
-
-            try {
-                // open serial port, and use class name for the appName.
-                serialPort = (SerialPort) portId.open(this.getClass().getName(),
-                        TIME_OUT);
-
-                // set port parameters
-                serialPort.setSerialPortParams(DATA_RATE,
-                        SerialPort.DATABITS_8,
-                        SerialPort.STOPBITS_1,
-                        SerialPort.PARITY_NONE);
-
-                // open the streams
-                input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-                output = serialPort.getOutputStream();
-
-                // add event listeners
-                serialPort.addEventListener(this);
-                serialPort.notifyOnDataAvailable(true);
-            } catch (Exception e) {
-                System.err.println(e.toString());
-            }
         }
 
-        /**
-         * This should be called when you stop using the port.
-         * This will prevent port locking on platforms like Linux.
-         */
-        public synchronized void close() {
-            if (serialPort != null) {
-                serialPort.removeEventListener();
-                serialPort.close();
-            }
-        }
-
-        /**
-         * Handle an event on the serial port. Read the data and print it.
-         */
-        public synchronized void serialEvent(SerialPortEvent oEvent) {
-            if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-                try {
-                    String inputLine=input.readLine();
-                    RFSecureClient.logEvent(inputLine.split("&")[2],
-                            inputLine.split("&")[0]);
-                    RFSecureClient.logEvent(inputLine.split("&")[3],
-                            inputLine.split("&")[1]);
-                    System.out.println(inputLine);
-                } catch (Exception e) {
-                    System.err.println(e.toString());
-                }
-            }
-            // Ignore all the other eventTypes, but you should consider the other ones.
-        }
 
         public static void main(String[] args) throws Exception {
             MainClass main = new MainClass();
