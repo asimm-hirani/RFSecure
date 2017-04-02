@@ -224,8 +224,8 @@ def log():
         if number is None:
             error = 'personal ID not found in database'
             return render_template('log.html', error=error)
-        db.execute('insert into logs (location, regTimestamp, cardID, flag) values (?, ?, ?, ?)',
-            [request.form['location'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), number, request.form['flag']])
+        db.execute('insert into logs (location, regTimestamp, idNum, cardID, flag) values (?, ?, ?, ?, ?)',
+            [request.form['location'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['number'], number, request.form['flag']])
     return render_template('log.html', error=error)
 
 @app.route('/searchfirst', methods=['POST', 'GET'])

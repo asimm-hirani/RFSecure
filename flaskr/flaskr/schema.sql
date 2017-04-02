@@ -32,9 +32,12 @@ create table logs (
     id integer primary key autoincrement,
     location text not null,
     regTimestamp text not null,
+    idNum text not null,
     cardID text not null,
     flag text not null
 );
+insert into logs (id, location, regTimestamp, idNum, cardID, flag)
+values (0, 'desk', '2014-10-18 21:31:12', '903567890', 'placeholder', 'low-risk');
 create table levels (
     id integer primary key autoincrement,
     idNum text not null,
