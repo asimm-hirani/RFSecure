@@ -87,7 +87,10 @@ def admin():
 @login_required
 def security():
     session['back'] = False
-    return render_template('security.html')
+    db = get_db()
+    cur = db.execute('select location, regTimestamp, cardID, flag from logs order by id desc')
+    logs = cur.fetchall()
+    return render_template('security.html', logs=logs)
 
 @app.route('/worker')
 @login_required
@@ -182,11 +185,11 @@ def register():
         if request.form['access'] not in viable:
             error = 'invalid access level'
             return render_template('register.html', error=error)
-        if request.form['image'] is None:
+        if not request.form['image']:
             error = 'no picture taken'
             return render_template('register.html', error=error)
         db = get_db()
-        cur = db.execute('select numID from visitors order by id desc')
+        cur = db.execute('select idNum from visitors order by id desc')
         visitors = cur.fetchall()
         for row in visitors:
             if row[0] == request.form['number']:
@@ -204,6 +207,26 @@ def register():
         session['back'] = False
         return redirect(url_for('worker'))
     return render_template('register.html', error=error)
+
+@app.route('/log', methods=['POST', 'GET'])
+@login_required
+def log():
+    error = None
+    number = None
+    session['back'] = True
+    if request.method == 'POST':
+        db = get_db()
+        cur = db.execute('select idNum, cardID from visitors order by id desc')
+        visitors = cur.fetchall()
+        for row in visitors:
+            if row[0] == request.form['number']:
+                number = row[1]
+        if number is None:
+            error = 'personal ID not found in database'
+            return render_template('log.html', error=error)
+        db.execute('insert into logs (location, regTimestamp, cardID, flag) values (?, ?, ?, ?)',
+            [request.form['location'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), number, request.form['flag']])
+    return render_template('log.html', error=error)
 
 @app.route('/searchfirst', methods=['POST', 'GET'])
 @login_required

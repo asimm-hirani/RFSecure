@@ -170,9 +170,9 @@ import gnu.io.SerialPortEventListener;
             if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
                 try {
                     String inputLine=input.readLine();
-                    client.logEvent(inputLine.split("&")[2],
+                    RFSecureClient.logEvent(inputLine.split("&")[2],
                             inputLine.split("&")[0]);
-                    client.logEvent(inputLine.split("&")[3],
+                    RFSecureClient.logEvent(inputLine.split("&")[3],
                             inputLine.split("&")[1]);
                     System.out.println(inputLine);
                 } catch (Exception e) {

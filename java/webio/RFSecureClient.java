@@ -16,10 +16,14 @@ import org.apache.http.util.EntityUtils;
 
 public class RFSecureClient {
 
-     static String url =
+    static String url =
          "http://www.rfsecure.net/api/";
 
+<<<<<<< HEAD
     public void logEvent(String keyID, String sensorID) throws Exception {
+=======
+    public static void logEvent(String keyID, String sensorID) throws Exception {
+>>>>>>> 525c18a023c6dec8a6acfcd75a7ba3ad1e6f145b
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httpPost = new HttpPost(url);
@@ -42,8 +46,12 @@ public class RFSecureClient {
             httpclient.close();
         }
     }
+<<<<<<< HEAD
 
     public void logMovementEvent(String sensorID) {
+=======
+    public static void logMovementEvent(String sensorID) throws Exception {
+>>>>>>> 525c18a023c6dec8a6acfcd75a7ba3ad1e6f145b
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httpPost = new HttpPost(url);
