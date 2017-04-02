@@ -32,7 +32,8 @@ create table logs (
     id integer primary key autoincrement,
     location text not null,
     regTimestamp text not null,
-    idNum text not null
+    cardID text not null,
+    flag text not null
 );
 create table levels (
     id integer primary key autoincrement,

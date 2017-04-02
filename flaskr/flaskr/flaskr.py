@@ -18,7 +18,7 @@ app.config.from_object(__name__)
 
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'flaskr.db'),
-    SECRET_KEY='dogeface'
+    SECRET_KEY= 'jinja pi the lambda high noon rectangle visits'
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
@@ -36,11 +36,6 @@ def load_user(user_id):
             user.id = row[1]
             return user
     return
-    # if user_id not in users[0]bcrypt.check_password_hash(row[1], request.form['password']):
-    #     return
-    # user = User()
-    # user.id = user_id
-    # return user
 
 def connect_db():
     """Connects to the specific database."""
@@ -187,6 +182,9 @@ def register():
         if request.form['access'] not in viable:
             error = 'invalid access level'
             return render_template('register.html', error=error)
+        if request.form['image'] is None:
+            error = 'no picture taken'
+            return render_template('register.html', error=error)
         db = get_db()
         cur = db.execute('select numID from visitors order by id desc')
         visitors = cur.fetchall()
@@ -195,7 +193,7 @@ def register():
                 error = 'duplicate personal ID'
                 return render_template('register.html', error=error)
         db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum, access, cardID) values (?, ?, ?, ?, ?, ?)',
-            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form["image"], request.form['number']], request.form['access'], 'placeholder')
+            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number']], request.form['access'], 'placeholder')
         if request.form['access'] == 'visitor':
             levels = ['1', '0']
         elif request.form['access'] == 'employee':
@@ -265,3 +263,7 @@ def search_list():
 def logout():
     logout_user()
     return redirect(somewhere)
+
+# if __name__ == "__main__":
+#     context = ('server.crt', 'server.key')
+#     app.run(host='127.0.0.1', port=80, ssl_context=context, threaded=True, debug=False)
