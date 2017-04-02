@@ -88,7 +88,7 @@ def admin():
 def security():
     session['back'] = False
     db = get_db()
-    cur = db.execute('select location, regTimestamp, idNum, cardID, flag from logs order by id desc')
+    cur = db.execute('select location, regTimestamp, cardID, flag from logs order by id desc')
     logs = cur.fetchall()
     return render_template('security.html', logs=logs)
 
@@ -214,16 +214,22 @@ def register():
 @login_required
 def sensor():
     db = get_db()
-    db.execute('insert into logs (location, regTimestamp, idNum, cardID, flag) values (?, ?, ?, ?, ?)',
-        [request.form['sensorID'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), 'unassigned', [request.form['keyID'], 'low-risk'])
+    db.execute('insert into logs (location, regTimestamp, cardID, flag) values (?, ?, ?, ?)',
+        [request.form['sensorID'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['keyID'], 'low-risk'])
     db.commit()
 
 @app.route('/motion', methods=['POST'])
 @login_required
 def motion():
+    risk = 'high-risk'
     db = get_db()
-    db.execute('insert into logs (location, regTimestamp, idNum, cardID, flag) values (?, ?, ?, ?, ?)',
-        [request.form['sensorID'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), 'unassigned', 'motion', 'low-risk'])
+    cur = db.execute('select regTimestamp, cardID from logs order by datetime(regTimestamp) DESC Limit 5')
+    logs = cur.fetchall()
+    for row in logs:
+        if row[0] >= datetime.datetime.now().timedelta(seconds=-10) and row[0] <= datetime.datetime.now().timedelta(seconds=10) and row[1] != 'motion':
+            risk = 'low-risk'
+    db.execute('insert into logs (location, regTimestamp, cardID, flag) values (?, ?, ?, ?)',
+        [request.form['sensorID'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), 'motion', risk])
     db.commit()
 
 @app.route('/log', methods=['POST', 'GET'])
@@ -243,8 +249,8 @@ def log():
             error = 'personal ID not found in database'
             db.commit()
             return render_template('log.html', error=error)
-        db.execute('insert into logs (location, regTimestamp, idNum, cardID, flag) values (?, ?, ?, ?, ?)',
-            [request.form['location'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['number'], number, request.form['flag']])
+        db.execute('insert into logs (location, regTimestamp, cardID, flag) values (?, ?, ?, ?)',
+            [request.form['location'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), number, request.form['flag']])
     db.commit()
     return render_template('log.html', error=error)
 
