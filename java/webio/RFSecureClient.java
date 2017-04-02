@@ -17,9 +17,9 @@ import org.apache.http.util.EntityUtils;
 public class RFSecureClient {
 
     static String urlSensor =
-         "http://www.rfsecure.net/sensor/";
+         "http://77a6cdd1.ngrok.io/sensor";
     static String urlMotion =
-            "http://www.rfsecure.net/motion/";
+            "http://77a6cdd1.ngrok.io/motion";
 
     public static void logEvent(String sensorID, String keyID) throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
