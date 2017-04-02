@@ -17,7 +17,7 @@ void setup(void) {
   #ifndef ESP8266
     while (!Serial); // for Leonardo/Micro/Zero
   #endif
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 
@@ -51,5 +51,6 @@ void loop(void) {
   Serial.print('&');
   Serial.print((int)pass2, DEC);
   Serial.println(); 
+  delay(10);
 }
 
