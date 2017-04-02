@@ -195,8 +195,10 @@ def register():
             if row[0] == request.form['number']:
                 error = 'duplicate personal ID'
                 return render_template('register.html', error=error)
+        cur = db.execute('select cardID from logs order by datetime(regTimestamp) DESC Limit 1')
+        logs = cur.fetchall()
         db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum, access, cardID) values (?, ?, ?, ?, ?, ?)',
-            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number']], request.form['access'], 'placeholder')
+            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number']], request.form['access'], logs[0][0])
         if request.form['access'] == 'visitor':
             levels = ['1', '0']
         elif request.form['access'] == 'employee':
@@ -207,6 +209,22 @@ def register():
         session['back'] = False
         return redirect(url_for('worker'))
     return render_template('register.html', error=error)
+
+@app.route('/sensor', methods=['POST'])
+@login_required
+def sensor():
+    db = get_db()
+    db.execute('insert into logs (location, regTimestamp, idNum, cardID, flag) values (?, ?, ?, ?, ?)',
+        [request.form['sensorID'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), 'unassigned', [request.form['keyID'], 'low-risk'])
+    db.commit()
+
+@app.route('/motion', methods=['POST'])
+@login_required
+def motion():
+    db = get_db()
+    db.execute('insert into logs (location, regTimestamp, idNum, cardID, flag) values (?, ?, ?, ?, ?)',
+        [request.form['sensorID'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), 'unassigned', 'motion', 'low-risk'])
+    db.commit()
 
 @app.route('/log', methods=['POST', 'GET'])
 @login_required
@@ -223,9 +241,11 @@ def log():
                 number = row[1]
         if number is None:
             error = 'personal ID not found in database'
+            db.commit()
             return render_template('log.html', error=error)
         db.execute('insert into logs (location, regTimestamp, idNum, cardID, flag) values (?, ?, ?, ?, ?)',
             [request.form['location'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['number'], number, request.form['flag']])
+    db.commit()
     return render_template('log.html', error=error)
 
 @app.route('/searchfirst', methods=['POST', 'GET'])

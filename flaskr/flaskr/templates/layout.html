@@ -6,6 +6,7 @@
   <div class=metanav>
   {% if session.admin %}
       <a href="{{ url_for('profile') }}">Create New User</a>
+      <a href="{{ url_for('register') }}">Register New Visitor</a>
       <a href="{{ url_for('log') }}">Add Security Log</a>
   {% elif session.worker %}
       <a href="{{ url_for('register') }}">Register New Visitor</a>
