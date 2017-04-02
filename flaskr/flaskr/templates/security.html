@@ -17,11 +17,29 @@
     </dl>
   </form>
   <h2>Security Log</h2>
+  <table>
+  <tr>
+    <th>Location</th>
+    <th>Timestamp</th>
+    <th>Personal ID</th>
+    <th>Card ID</th>
+    <th>Flag</th>
+  </tr>
   <ul class=logs>
   {% for log in logs %}
-    <li>{{ log[0] }} {{ log[1] }} {{ log[2] }} {{ log[3] }} {{ log[4] }}
-  {% else %}
-    <li><em>No Logs Found</em>
+  <tr>
+    <td>{{ log[0] }}</td>
+    <td>{{ log[1] }}</td>
+    <td>{{ log[2] }}</td>
+    <td>{{ log[3] }}</td>
+    <td>{{ log[4] }}</td>
+  </tr>
   {% endfor %}
   </ul>
+  </table>
+  <style>
+  table, th, td {
+    border: 1px solid black;
+  }
+  </style>
 {% endblock %}

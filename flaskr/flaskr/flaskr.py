@@ -88,7 +88,7 @@ def admin():
 def security():
     session['back'] = False
     db = get_db()
-    cur = db.execute('select location, regTimestamp, cardID, flag from logs order by id desc')
+    cur = db.execute('select location, regTimestamp, idNum, cardID, flag from logs order by id desc')
     logs = cur.fetchall()
     return render_template('security.html', logs=logs)
 
