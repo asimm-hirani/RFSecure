@@ -1,6 +1,7 @@
 import os
 import datetime
 import sqlite3
+import json
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 from flask_login import LoginManager
@@ -197,13 +198,13 @@ def register():
                 return render_template('register.html', error=error)
         cur = db.execute('select cardID from logs order by datetime(regTimestamp) DESC Limit 1')
         logs = cur.fetchall()
-        db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum, access, cardID) values (?, ?, ?, ?, ?, ?)',
-            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number']], request.form['access'], logs[0][0])
-        if request.form['access'] == 'visitor':
-            levels = ['1', '0']
-        elif request.form['access'] == 'employee':
-            levels = ['1', '1']
-        db.execute('insert into levels (cardID, access) values (?, ?)', ['placeholder', levels])
+        db.execute('insert into visitors (firstName, lastName, regTimestamp, image, idNum, access, cardID) values (?, ?, ?, ?, ?, ?, ?)',
+            [request.form['firstname'], request.form['lastname'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['image'], request.form['number'], request.form['access'], logs[0][0]])
+        # if request.form['access'] == 'visitor':
+        #     levels = ['1', '0']
+        # elif request.form['access'] == 'employee':
+        #     levels = ['1', '1']
+        # db.execute('insert into levels (idNum, access) values (?, ?)', [logs[0][0], levels])
         db.commit()
         flash('New visitor was successfully added')
         session['back'] = False
@@ -211,15 +212,14 @@ def register():
     return render_template('register.html', error=error)
 
 @app.route('/sensor', methods=['POST'])
-@login_required
 def sensor():
     db = get_db()
     db.execute('insert into logs (location, regTimestamp, cardID, flag) values (?, ?, ?, ?)',
         [request.form['sensorID'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), request.form['keyID'], 'low-risk'])
     db.commit()
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 @app.route('/motion', methods=['POST'])
-@login_required
 def motion():
     risk = 'high-risk'
     db = get_db()
@@ -231,6 +231,7 @@ def motion():
     db.execute('insert into logs (location, regTimestamp, cardID, flag) values (?, ?, ?, ?)',
         [request.form['sensorID'], '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), 'motion', risk])
     db.commit()
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 @app.route('/log', methods=['POST', 'GET'])
 @login_required
