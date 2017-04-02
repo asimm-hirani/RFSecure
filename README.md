@@ -1,12 +1,14 @@
 # RFSecure
 
+Windows Setup Instructions
+
 cd flaskr
 
 pip install --editable .
 
-export FLASK_APP=flaskr
+set FLASK_APP=flaskr
 
-export FLASK_DEBUG=true
+set FLASK_DEBUG=true
 
 flask initdb
 
