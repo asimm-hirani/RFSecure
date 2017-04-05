@@ -54,9 +54,9 @@ LINKBSD64=c++ -m64 -shared
 WINLINKOPT = -shared -Wl,--add-stdcall-alias -DBUILD_DLL
 WINCCOPT = -O3 -Wall -DBUILD_DLL
 #JDKDIR = C:\Program Files\Java\jdk1.6.0_24\include
-JDKDIR = D:/java-32/jdk1.7.0_25/include
+JDKDIR = D:\Program Files\Java\jdk1.8.0_112\include
 
-WININCLUDE32=-I".\include" -I".\include\target" -I".\include\windows" -I"C:\MinGW\include" -I"$(JDKDIR)" -I"$(JDKDIR)\win32"
+WININCLUDE32=-I".\include" -I".\include\target" -I".\include\windows" -I"D:\MinGW\include" -I"$(JDKDIR)" -I"$(JDKDIR)\win32"
 CCWIN32 = wine "C:\MinGW\bin\gcc.exe" $(WININCLUDE32) -m32 $(WINCCOPT)
 LINKWIN32 =wine "C:\MinGW\bin\gcc.exe" $(WINLINKOPT)
 
@@ -70,13 +70,13 @@ LINKWIN64 =wine "C:\MinGW64\bin\gcc.exe" $(WINLINKOPT)
 # MINGW32 = C:\MinGW32
 # MINGW64 = C:\MinGW64
 MINGW32 = D:\MinGW
-MINGW64 = D:\MinGW
+MINGW64 = D:\MinGW64\mingw64
 
-WININCLUDE32N=-I".\include" -I".\include\target" -I".\include\windows" -I"$(MINGW32)\include" -I"$(JDKDIR)" -I"$(JDKDIR)/win32"
+WININCLUDE32N=-I".\include" -I".\include\target" -I".\include\windows" -I"$(MINGW32)\include" -I"$(JDKDIR)" -I"$(JDKDIR)\win32"
 CCWIN32N = "$(MINGW32)\bin\gcc.exe" $(WININCLUDE32N) -m32 $(WINCCOPT)
 LINKWIN32N ="$(MINGW32)\bin\gcc.exe" $(WINLINKOPT)
 
-WININCLUDE64N=-I".\include" -I".\include\target" -I".\include\windows" -I"$(MINGW64)\include" -I"$(JDKDIR)" -I"$(JDKDIR)/win32"
+WININCLUDE64N=-I".\include" -I".\include\target" -I".\include\windows" -I"$(MINGW64)\include" -I"$(JDKDIR)" -I"$(JDKDIR)\win32"
 CCWIN64N = "$(MINGW64)\bin\gcc.exe" $(WININCLUDE64N) -m64 $(WINCCOPT)
 LINKWIN64N ="$(MINGW64)\bin\gcc.exe" $(WINLINKOPT)
 
@@ -103,18 +103,18 @@ dirs:
 	fi
 
 windowsLocal:
-	$(CCWIN64N) -c src/windows/init.c -o build/init.o
-	$(CCWIN64N) -c src/windows/termios.c -o build/termios.o
-	$(CCWIN64N) -c src/fixup.c -o build/fixup.o
-	$(CCWIN64N) -c src/fuserImp.c -o build/fuserImp.o
-	$(CCWIN64N) -c src/SerialImp.c -o build/SerialImp.o
+	$(CCWIN64N) -c -o build/init.o src/windows/init.c
+	$(CCWIN64N) -c -o build/termios.o src/windows/termios.c
+	$(CCWIN64N) -c -o build/fixup.o src/fixup.c
+	$(CCWIN64N) -c -o build/fuserImp.o src/fuserImp.c
+	$(CCWIN64N) -c -o build/SerialImp.o src/SerialImp.c
 	$(LINKWIN64N) -o"resources/native/windows/x86_64/libNRJavaSerial.dll" build/SerialImp.o build/fuserImp.o build/fixup.o build/termios.o build/init.o
 
-	$(CCWIN32N) -c src/windows/init.c -o build/init.o
-	$(CCWIN32N) -c src/windows/termios.c -o build/termios.o
-	$(CCWIN32N) -c src/fixup.c -o build/fixup.o
-	$(CCWIN32N) -c src/fuserImp.c -o build/fuserImp.o
-	$(CCWIN32N) -c src/SerialImp.c -o build/SerialImp.o
+	$(CCWIN32N) -c -o build/init.o src/windows/init.c
+	$(CCWIN32N) -c -o build/termios.o src/windows/termios.c
+	$(CCWIN32N) -c -o build/fixup.o src/fixup.c
+	$(CCWIN32N) -c -o build/fuserImp.o src/fuserImp.c
+	$(CCWIN32N) -c -o build/SerialImp.o src/SerialImp.c
 	$(LINKWIN32N) -o"resources/native/windows/x86_32/libNRJavaSerial.dll" build/SerialImp.o build/fuserImp.o build/fixup.o build/termios.o build/init.o
 
 

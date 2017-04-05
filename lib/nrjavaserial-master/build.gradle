@@ -4,6 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
+
 sourceCompatibility = '1.6'
 targetCompatibility = '1.6'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
@@ -51,7 +52,7 @@ dependencies {
 }
 
 jar {
-	
+
 	jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	/* Package up all runtime files (our classes and those of dependencies) into
 	 * our JAR. This gets us a sort of poor man's shaded JAR/"fat JAR". */
